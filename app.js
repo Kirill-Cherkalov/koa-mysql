@@ -2,36 +2,28 @@ const Koa = require('koa');
 const Router  = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
+const { Model } = require('objection');
 require('dotenv').config()
 
-const db = require('./mysql');
+const knex = require('./knex');
+const User = require('./app/models/user');
+
+const authRoutes = require('./app/routes/auth');
 
 const app = new Koa();
 const router = new Router();
+Model.knex(knex);
 
 app.use(bodyParser());
 app.use(logger());
 
 router.get('/', async (ctx) => {
-  const promise = new Promise((res, rej) => {
-    db.query('SELECT * FROM actor', (err, rows, fields) => {
-      if (err) {
-        rej(err)
-      } else {
-        res({ rows, fields })
-      }
-    });
-  });
+  const result = await User.query().select('*');
 
-  try {
-    const res = await promise;
-    ctx.body = res
-    
-  } catch (error) {
-    ctx.body = error;
-  }
+  ctx.body = result;
 });
 
 app.use(router.routes());
+app.use(authRoutes.routes());
 
-app.listen(3000);
+app.listen(3001);

@@ -1,0 +1,24 @@
+{
+  "name": "koa-objection-knex-mysql",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Kirill Cherkalov",
+  "license": "MIT",
+  "scripts": {
+    "start": "nodemon app.js"
+  },
+  "dependencies": {
+    "bcrypt": "^3.0.6",
+    "dotenv": "^8.0.0",
+    "knex": "^0.19.1",
+    "koa": "^2.7.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-router": "^7.4.0",
+    "mysql": "^2.17.1",
+    "objection": "^1.6.9"
+  },
+  "devDependencies": {
+    "koa-logger": "^3.2.1",
+    "nodemon": "^1.19.1"
+  }
+}

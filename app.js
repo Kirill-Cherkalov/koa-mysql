@@ -9,12 +9,10 @@ const views = require('koa-views');
 require('dotenv').config();
 
 const knex = require('./app/server/connection');
-// const User = require('./app/models/user');
 
 const authRoutes = require('./app/routes/auth');
 const notFoundRoutes = require('./app/routes/notFound');
 const dashboard = require('./app/routes/dashboard');
-// const authRoutes = require('./app/routes/notFound');
 
 const app = new Koa();
 const PORT = process.env.PORT || 1337;

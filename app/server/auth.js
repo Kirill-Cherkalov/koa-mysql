@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 const passport = require('koa-passport');
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcrypt');
@@ -25,9 +26,8 @@ passport.use(new LocalStrategy(options, async (username, password, done) => {
     if (!user) {
       return done(null, false);
     }
-    const res = await bcrypt.compare(password, user.password);
 
-    if (res) {
+    if (await bcrypt.compare(password, user.password)) {
       return done(null, user);
     }
   } catch (error) {

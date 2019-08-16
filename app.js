@@ -13,6 +13,7 @@ const knex = require('./app/server/connection');
 
 const authRoutes = require('./app/routes/auth');
 const notFoundRoutes = require('./app/routes/notFound');
+const dashboard = require('./app/routes/dashboard');
 // const authRoutes = require('./app/routes/notFound');
 
 const app = new Koa();
@@ -28,6 +29,8 @@ app.use(bodyParser());
 app.use(logger());
 
 // authentication
+require('./app/server/auth');
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -41,6 +44,7 @@ app.use(views(path.join(__dirname, 'app', 'views'), {
 
 // routes
 app.use(authRoutes.routes());
+app.use(dashboard.routes());
 app.use(notFoundRoutes.routes());
 
 // server

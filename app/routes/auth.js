@@ -1,5 +1,6 @@
 const Router = require('koa-router');
 const bcrypt = require('bcrypt');
+const passport = require('koa-passport');
 
 const User = require('../models/user');
 
@@ -12,11 +13,20 @@ const register = async (ctx) => {
     const { username, password } = ctx.request.body;
     const hash = await bcrypt.hash(password, Number(process.env.BCRYPT_SALT_ROUNDS));
 
-    const newUser = await User.query().insert({
+    await User.query().insert({
       username,
       password: hash,
     });
-    ctx.body = newUser;
+
+    return passport.authenticate('local', (err, user, info, status) => {
+      if (user) {
+        ctx.login(user);
+        ctx.redirect('/');
+      } else {
+        ctx.status = 400;
+        ctx.body = { status: 'error' };
+      }
+    })(ctx);
   } catch (error) {
     ctx.body = error;
   }

@@ -1,29 +1,49 @@
+const path = require('path');
 const Koa = require('koa');
-const Router  = require('koa-router');
 const bodyParser = require('koa-bodyparser');
 const logger = require('koa-logger');
 const { Model } = require('objection');
-require('dotenv').config()
+const session = require('koa-session');
+const passport = require('koa-passport');
+const views = require('koa-views');
+require('dotenv').config();
 
-const knex = require('./knex');
-const User = require('./app/models/user');
+const knex = require('./app/server/connection');
+// const User = require('./app/models/user');
 
 const authRoutes = require('./app/routes/auth');
+const notFoundRoutes = require('./app/routes/notFound');
+// const authRoutes = require('./app/routes/notFound');
 
 const app = new Koa();
-const router = new Router();
+const PORT = process.env.PORT || 1337;
 Model.knex(knex);
 
+// sessions
+app.keys = ['super-secret-key'];
+app.use(session(app));
+
+// body parser
 app.use(bodyParser());
 app.use(logger());
 
-router.get('/', async (ctx) => {
-  const result = await User.query().select('*');
+// authentication
+app.use(passport.initialize());
+app.use(passport.session());
 
-  ctx.body = result;
-});
+// views
+app.use(views(path.join(__dirname, 'app', 'views'), {
+  extension: 'hbs',
+  map: {
+    hbs: 'handlebars',
+  },
+}));
 
-app.use(router.routes());
+// routes
 app.use(authRoutes.routes());
+app.use(notFoundRoutes.routes());
 
-app.listen(3001);
+// server
+app.listen(PORT, () => {
+  console.log(`Server listening on port: ${PORT}`);
+});

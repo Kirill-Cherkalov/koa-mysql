@@ -4,14 +4,11 @@ const bcrypt = require('bcrypt');
 const passport = require('koa-passport');
 
 const User = require('../models/user');
+const { isAuthenticated } = require('../server/auth');
 
 const router = new Router({
   prefix: '/auth',
 });
-
-const getRegisterPage = async (ctx) => {
-  await ctx.render('register');
-};
 
 const register = async (ctx) => {
   try {
@@ -26,7 +23,7 @@ const register = async (ctx) => {
     return passport.authenticate('local', (err, user) => {
       if (user) {
         ctx.login(user);
-        ctx.redirect('/');
+        ctx.body = { user };
       } else {
         ctx.status = 400;
         ctx.body = { status: 'error' };
@@ -37,15 +34,11 @@ const register = async (ctx) => {
   }
 };
 
-const getLoginPage = async (ctx) => {
-  await ctx.render('login');
-};
-
 const login = async ctx => (
   passport.authenticate('local', (err, user) => {
     if (user) {
       ctx.login(user);
-      ctx.redirect('/');
+      ctx.body = user;
     } else {
       ctx.status = 400;
       ctx.body = { status: 'error' };
@@ -55,21 +48,31 @@ const login = async ctx => (
 
 const logout = async (ctx) => {
   try {
+    ctx.logout();
+    ctx.redirect('/auth/login');
+  } catch (error) {
+    ctx.body = error;
+    ctx.throw(401);
+  }
+};
+
+const isUserAuthenticated = async (ctx) => {
+  try {
     if (ctx.isAuthenticated()) {
-      ctx.logout();
-      ctx.redirect('/auth/login');
+      ctx.body = ctx.state.user;
+    } else {
+      ctx.body = 'User is not authorized';
     }
   } catch (error) {
-    ctx.body = { success: false };
+    ctx.body = error;
     ctx.throw(401);
   }
 };
 
 router
-  .get('/register', getRegisterPage)
   .post('/register', register)
-  .get('/logout', logout)
-  .get('/login', getLoginPage)
-  .post('/login', login);
+  .get('/logout', isAuthenticated, logout)
+  .post('/login', login)
+  .post('/isAuthenticated', isUserAuthenticated);
 
 module.exports = router;

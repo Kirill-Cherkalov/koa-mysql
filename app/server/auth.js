@@ -34,3 +34,15 @@ passport.use(new LocalStrategy(options, async (username, password, done) => {
     done(error);
   }
 }));
+
+const isAuthenticated = async (ctx, next) => {
+  if (ctx.isAuthenticated()) {
+    await next();
+  } else {
+    ctx.status = 400;
+  }
+};
+
+module.exports = {
+  isAuthenticated,
+};
